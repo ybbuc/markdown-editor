@@ -1,5 +1,7 @@
 # @ybbuc/markdown-editor
 
+[![CI](https://github.com/ybbuc/markdown-editor/actions/workflows/ci.yml/badge.svg)](https://github.com/ybbuc/markdown-editor/actions/workflows/ci.yml)
+
 Typed, dependency-free logic for a markdown editor toolbar.
 
 Two layers:
