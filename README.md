@@ -6,8 +6,8 @@ Typed, dependency-free logic for a markdown editor toolbar.
 
 Two layers:
 
-- **`markdown-text.ts`** — pure selection/text transforms (`wrapSelection`,
-  `toggleSelectionList`, `continueBlockEnter`, `computeActiveMarks`, …). No DOM,
+- **`markdown-text.ts`** — pure selection/text transforms (`toggleWrap`,
+  `toggleList`, `handleBlockEnter`, `computeActiveMarks`, …). No DOM,
   no framework. Unit-tested.
 - **`markdown-editor.ts`** — the Alpine data factory wiring those transforms to
   a `<textarea>` (`registerMarkdownEditor`). The markup stays in the consuming
@@ -21,7 +21,7 @@ bundler transpiles it — no build or publish step.
 Consumed as a pinned git dependency:
 
 ```bash
-pnpm add github:ybbuc/markdown-editor#v0.9.0
+pnpm add github:ybbuc/markdown-editor#v0.9.1
 ```
 
 ## Usage

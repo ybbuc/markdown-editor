@@ -1,13 +1,13 @@
 import type { AlpineGlobal } from './alpine'
 import {
   computeActiveMarks,
-  continueBlockEnter,
-  type Edit,
+  handleBlockEnter,
   type ListKind,
   prefixSelectionLines,
-  type Selection,
-  toggleSelectionList,
-  wrapSelection,
+  type TextEdit,
+  type TextSelection,
+  toggleList,
+  toggleWrap,
 } from './markdown-text'
 
 // Options the x-data call site passes:
@@ -81,14 +81,14 @@ export function registerMarkdownEditor(
       }
     },
 
-    _sel(ta: HTMLTextAreaElement): Selection {
+    _selection(ta: HTMLTextAreaElement): TextSelection {
       return { value: ta.value, start: ta.selectionStart, end: ta.selectionEnd }
     },
 
     _updateActive() {
       const ta = this.ta
       if (!ta) return
-      this.activeMarks = computeActiveMarks(this._sel(ta))
+      this.activeMarks = computeActiveMarks(this._selection(ta))
     },
 
     _updateTbTabindex() {
@@ -175,34 +175,34 @@ export function registerMarkdownEditor(
       this.$nextTick(() => this._updateActive())
     },
 
-    _applyEdit(edit: Edit) {
+    _applyEdit(edit: TextEdit) {
       this._applyInsert(edit.text, edit.start, edit.end)
       const ta = this.ta
-      if (ta) ta.setSelectionRange(edit.selStart, edit.selEnd)
+      if (ta) ta.setSelectionRange(edit.selectionStart, edit.selectionEnd)
     },
 
     insertWrap(before: string, after: string) {
       const ta = this.ta
       if (!ta) return
-      this._applyEdit(wrapSelection(this._sel(ta), before, after))
+      this._applyEdit(toggleWrap(this._selection(ta), before, after))
     },
 
     insertLine(prefix: string) {
       const ta = this.ta
       if (!ta) return
-      this._applyEdit(prefixSelectionLines(this._sel(ta), prefix))
+      this._applyEdit(prefixSelectionLines(this._selection(ta), prefix))
     },
 
     toggleList(kind: ListKind) {
       const ta = this.ta
       if (!ta) return
-      this._applyEdit(toggleSelectionList(this._sel(ta), kind))
+      this._applyEdit(toggleList(this._selection(ta), kind))
     },
 
     _handleBlockEnter(): boolean {
       const ta = this.ta
       if (!ta) return false
-      const edit = continueBlockEnter(this._sel(ta))
+      const edit = handleBlockEnter(this._selection(ta))
       if (!edit) return false
       this._applyEdit(edit)
       return true

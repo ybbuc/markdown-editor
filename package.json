@@ -1,6 +1,6 @@
 {
   "name": "@ybbuc/markdown-editor",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Typed, dependency-free markdown-editor logic: selection transforms plus an Alpine data factory.",
   "type": "module",
   "sideEffects": false,

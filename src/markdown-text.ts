@@ -1,16 +1,16 @@
 // Pure text/selection transforms: each takes the textarea's value + selection
 // and returns the edit to apply. No DOM; the client bundle performs the write.
 
-export type Selection = { value: string; start: number; end: number }
+export type TextSelection = { value: string; start: number; end: number }
 
 // [start,end) is replaced by `text`, then the selection is set to
-// [selStart,selEnd) in the resulting value.
-export type Edit = {
+// [selectionStart,selectionEnd) in the resulting value.
+export type TextEdit = {
   text: string
   start: number
   end: number
-  selStart: number
-  selEnd: number
+  selectionStart: number
+  selectionEnd: number
 }
 
 export type ActiveMarks = {
@@ -81,8 +81,8 @@ function lineBounds(
   return { start: lineStart, end: nl === -1 ? value.length : nl }
 }
 
-export function computeActiveMarks(sel: Selection): ActiveMarks {
-  const { value, start, end } = sel
+export function computeActiveMarks(selection: TextSelection): ActiveMarks {
+  const { value, start, end } = selection
   if (!value) return { ...EMPTY_MARKS }
   const { start: lineStart, end: lineEnd } = lineBounds(value, start, end)
   const line = value.slice(lineStart, lineEnd)
@@ -105,12 +105,12 @@ export function computeActiveMarks(sel: Selection): ActiveMarks {
 
 // Toggle the inline markers around the selection: unwrap if the markers are
 // inside the selection or just outside it, otherwise wrap.
-export function wrapSelection(
-  sel: Selection,
+export function toggleWrap(
+  selection: TextSelection,
   before: string,
   after: string,
-): Edit {
-  const { value, start, end } = sel
+): TextEdit {
+  const { value, start, end } = selection
   const selected = value.slice(start, end)
   if (
     selected.length >= before.length + after.length &&
@@ -122,8 +122,8 @@ export function wrapSelection(
       text: inner,
       start,
       end,
-      selStart: start,
-      selEnd: start + inner.length,
+      selectionStart: start,
+      selectionEnd: start + inner.length,
     }
   }
   if (
@@ -136,25 +136,34 @@ export function wrapSelection(
       text: selected,
       start: newStart,
       end: end + after.length,
-      selStart: newStart,
-      selEnd: newStart + selected.length,
+      selectionStart: newStart,
+      selectionEnd: newStart + selected.length,
     }
   }
   if (start === end) {
     const caret = start + before.length
-    return { text: before + after, start, end, selStart: caret, selEnd: caret }
+    return {
+      text: before + after,
+      start,
+      end,
+      selectionStart: caret,
+      selectionEnd: caret,
+    }
   }
   return {
     text: before + selected + after,
     start,
     end,
-    selStart: start + before.length,
-    selEnd: start + before.length + selected.length,
+    selectionStart: start + before.length,
+    selectionEnd: start + before.length + selected.length,
   }
 }
 
-export function prefixSelectionLines(sel: Selection, prefix: string): Edit {
-  const { value, start, end } = sel
+export function prefixSelectionLines(
+  selection: TextSelection,
+  prefix: string,
+): TextEdit {
+  const { value, start, end } = selection
   const { start: lineStart, end: lineEnd } = lineBounds(value, start, end)
   const prefixed = value
     .slice(lineStart, lineEnd)
@@ -165,15 +174,15 @@ export function prefixSelectionLines(sel: Selection, prefix: string): Edit {
     text: prefixed,
     start: lineStart,
     end: lineEnd,
-    selStart: lineStart + prefix.length,
-    selEnd: lineStart + prefixed.length,
+    selectionStart: lineStart + prefix.length,
+    selectionEnd: lineStart + prefixed.length,
   }
 }
 
 // Toggle bullet/ordered markers on the selected block: strip when every
 // non-empty line already matches the kind, otherwise (re)number from 1.
-export function toggleSelectionList(sel: Selection, kind: ListKind): Edit {
-  const { value, start, end } = sel
+export function toggleList(selection: TextSelection, kind: ListKind): TextEdit {
+  const { value, start, end } = selection
   const { start: lineStart, end: lineEnd } = lineBounds(value, start, end)
   const block = value.slice(lineStart, lineEnd)
   const lines = block.split('\n')
@@ -200,22 +209,22 @@ export function toggleSelectionList(sel: Selection, kind: ListKind): Edit {
         text: replacement,
         start: lineStart,
         end: lineEnd,
-        selStart: caret,
-        selEnd: caret,
+        selectionStart: caret,
+        selectionEnd: caret,
       }
     : {
         text: replacement,
         start: lineStart,
         end: lineEnd,
-        selStart: lineStart,
-        selEnd: lineStart + replacement.length,
+        selectionStart: lineStart,
+        selectionEnd: lineStart + replacement.length,
       }
 }
 
 // Enter inside a blockquote/list: continue the block, or exit it when the
 // current item is empty. Returns null when the caret isn't in a block.
-export function continueBlockEnter(sel: Selection): Edit | null {
-  const { value, start, end } = sel
+export function handleBlockEnter(selection: TextSelection): TextEdit | null {
+  const { value, start, end } = selection
   if (start !== end) return null
   const pos = start
   const lineStart = value.lastIndexOf('\n', pos - 1) + 1
@@ -248,8 +257,8 @@ export function continueBlockEnter(sel: Selection): Edit | null {
       text: '\n',
       start: lineStart,
       end: pos,
-      selStart: caret,
-      selEnd: caret,
+      selectionStart: caret,
+      selectionEnd: caret,
     }
   }
   const insertion = `\n${indent}${marker}`
@@ -258,7 +267,7 @@ export function continueBlockEnter(sel: Selection): Edit | null {
     text: insertion,
     start: pos,
     end: pos,
-    selStart: caret,
-    selEnd: caret,
+    selectionStart: caret,
+    selectionEnd: caret,
   }
 }
