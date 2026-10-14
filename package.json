@@ -1,0 +1,25 @@
+{
+  "name": "@ybbuc/markdown-editor",
+  "version": "0.9.0",
+  "description": "Typed, dependency-free markdown-editor logic: selection transforms plus an Alpine data factory.",
+  "type": "module",
+  "sideEffects": false,
+  "packageManager": "pnpm@12.11.2",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check . && tsc --noEmit",
+    "lint:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
